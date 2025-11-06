@@ -10,18 +10,23 @@
 
 2. **Подготовьте файлы для деплоя:**
 
-   Создайте файл `render.yaml` в корне проекта:
+   Файлы уже созданы в проекте:
+   - `render.yaml` - конфигурация для Render
+   - `.python-version` - версия Python (3.11)
+   - `requirements.txt` - зависимости
+   
+   Если нужно создать вручную, файл `render.yaml`:
    ```yaml
    services:
      - type: web
        name: valve-portal
        env: python
-       buildCommand: pip install -r requirements.txt
+       runtime: python-3.11
+       buildCommand: pip install --upgrade pip && pip install -r requirements.txt
        startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
-       envVars:
-         - key: PYTHON_VERSION
-           value: 3.11.0
    ```
+   
+   И файл `.python-version` с содержимым: `3.11`
 
 3. **Загрузите проект на GitHub:**
    ```bash
@@ -39,14 +44,23 @@
    - Настройки:
      - **Name:** valve-portal
      - **Environment:** Python 3
-     - **Build Command:** `pip install -r requirements.txt`
+     - **Python Version:** 3.11 (важно! Не используйте 3.13)
+     - **Build Command:** `pip install --upgrade pip && pip install -r requirements.txt`
      - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
    - Нажмите "Create Web Service"
 
 5. **Важно для Render:**
+   - **ОБЯЗАТЕЛЬНО укажите Python 3.11 в настройках!** (не 3.13)
+   - В настройках сервиса найдите "Python Version" и выберите 3.11
+   - Или создайте файл `.python-version` с содержимым `3.11` (уже создан)
    - Render автоматически назначает порт через переменную `$PORT`
    - SQLite будет работать, но данные могут теряться при перезапуске
    - Для постоянного хранения используйте PostgreSQL (бесплатный план)
+   
+6. **Если возникает ошибка с pydantic-core:**
+   - Убедитесь, что используется Python 3.11 (не 3.13)
+   - Проверьте, что файл `.python-version` содержит `3.11`
+   - В настройках Render явно укажите Python 3.11
 
 ---
 
