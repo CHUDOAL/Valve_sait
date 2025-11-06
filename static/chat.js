@@ -151,6 +151,46 @@ function displayMessage(msg) {
     }
 }
 
+// Отправка сообщения ИИ
+async function sendToAI(event) {
+    event.preventDefault();
+    const input = document.getElementById('message-input');
+    const message = input.value.trim();
+    
+    if (!message) {
+        showNotification('Введите сообщение для ИИ', 'error');
+        return;
+    }
+    
+    try {
+        const formData = new FormData();
+        formData.append('message', message);
+        
+        const response = await fetch(`${API_URL}/api/chat/ai`, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Ошибка отправки сообщения ИИ');
+        }
+        
+        const result = await response.json();
+        
+        // Отображаем сообщение пользователя
+        displayMessage(result.user_message);
+        
+        // Отображаем ответ ИИ
+        displayMessage(result.ai_message);
+        
+        input.value = '';
+    } catch (error) {
+        showNotification(error.message, 'error');
+    }
+}
+
 // Отправка сообщения
 async function sendMessage(event) {
     event.preventDefault();
@@ -209,7 +249,12 @@ async function sendMessage(event) {
 function handleKeyPress(event) {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault();
-        sendMessage(event);
+        // Если нажат Ctrl/Cmd, отправляем ИИ, иначе обычное сообщение
+        if (event.ctrlKey || event.metaKey) {
+            sendToAI(event);
+        } else {
+            sendMessage(event);
+        }
     }
 }
 

@@ -16,6 +16,17 @@ from sqlalchemy.orm import selectinload
 
 from database import get_db, init_db, AsyncSessionLocal
 from models import User as UserModel, Task as TaskModel, UserSession as SessionModel, Message as MessageModel, Role, TaskStatus
+import os
+from dotenv import load_dotenv
+from openai import OpenAI
+
+load_dotenv()
+
+# Инициализация OpenAI клиента
+openai_client = None
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+if OPENAI_API_KEY:
+    openai_client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Создаем экземпляр FastAPI приложения
 app = FastAPI(
@@ -751,6 +762,152 @@ async def get_messages(request: Request, db: AsyncSession = Depends(get_db)):
         }
         for msg in reversed(messages)
     ]
+
+@app.post("/api/chat/ai")
+async def chat_with_ai(
+    message: str = Form(...),
+    request: Request = None,
+    db: AsyncSession = Depends(get_db)
+):
+    """Отправка сообщения ИИ и получение ответа"""
+    user = await require_auth(request, db)
+    
+    if not openai_client:
+        raise HTTPException(
+            status_code=503, 
+            detail="OpenAI API не настроен. Укажите OPENAI_API_KEY в переменных окружения."
+        )
+    
+    try:
+        # Получаем последние сообщения для контекста
+        result = await db.execute(
+            select(MessageModel)
+            .where(MessageModel.message_type == "text")
+            .order_by(MessageModel.created_at.desc())
+            .limit(10)
+        )
+        recent_messages = result.scalars().all()
+        
+        # Формируем контекст из последних сообщений
+        context = []
+        for msg in reversed(recent_messages):
+            result_user = await db.execute(select(UserModel).where(UserModel.id == msg.user_id))
+            msg_user = result_user.scalar_one_or_none()
+            if msg_user:
+                context.append({
+                    "role": "user",
+                    "content": f"{msg_user.username}: {msg.content}"
+                })
+        
+        # Добавляем текущее сообщение
+        context.append({
+            "role": "user",
+            "content": f"{user.username}: {message}"
+        })
+        
+        # Вызываем OpenAI API (используем o1-mini, если доступен, иначе gpt-4o-mini)
+        try:
+            response = openai_client.chat.completions.create(
+                model="o1-mini",  # Используем o1-mini
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Ты полезный AI-ассистент в корпоративном чате компании Valve. Отвечай кратко, дружелюбно и профессионально. Помогай сотрудникам с вопросами."
+                    }
+                ] + [
+                    {"role": msg["role"], "content": msg["content"]}
+                    for msg in context[-5:]  # Берем последние 5 сообщений для контекста
+                ],
+                max_tokens=500,
+                temperature=0.7
+            )
+        except Exception as e:
+            # Если o1-mini недоступен, используем gpt-4o-mini
+            if "o1-mini" in str(e).lower():
+                response = openai_client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[
+                        {
+                            "role": "system",
+                            "content": "Ты полезный AI-ассистент в корпоративном чате компании Valve. Отвечай кратко, дружелюбно и профессионально. Помогай сотрудникам с вопросами."
+                        }
+                    ] + [
+                        {"role": msg["role"], "content": msg["content"]}
+                        for msg in context[-5:]
+                    ],
+                    max_tokens=500,
+                    temperature=0.7
+                )
+            else:
+                raise
+        
+        ai_response = response.choices[0].message.content
+        
+        # Сохраняем сообщение пользователя
+        user_message = MessageModel(
+            user_id=user.id,
+            content=message,
+            message_type="text"
+        )
+        db.add(user_message)
+        
+        # Сохраняем ответ ИИ (создаем виртуального пользователя для ИИ или используем специальный ID)
+        ai_message = MessageModel(
+            user_id=user.id,  # Временно используем ID текущего пользователя, можно создать отдельного пользователя для ИИ
+            content=f"🤖 AI: {ai_response}",
+            message_type="text"
+        )
+        db.add(ai_message)
+        await db.commit()
+        await db.refresh(ai_message)
+        
+        # Получаем информацию о пользователе
+        result_user = await db.execute(select(UserModel).where(UserModel.id == user.id))
+        user_obj = result_user.scalar_one_or_none()
+        
+        # Отправляем оба сообщения через WebSocket
+        user_message_data = {
+            "id": user_message.id,
+            "user_id": user.id,
+            "username": user_obj.username,
+            "avatar": user_obj.avatar,
+            "content": user_message.content,
+            "message_type": "text",
+            "file_path": None,
+            "created_at": user_message.created_at.isoformat()
+        }
+        
+        ai_message_data = {
+            "id": ai_message.id,
+            "user_id": user.id,
+            "username": "AI Assistant",
+            "avatar": None,
+            "content": ai_message.content,
+            "message_type": "text",
+            "file_path": None,
+            "created_at": ai_message.created_at.isoformat()
+        }
+        
+        # Отправляем всем подключенным клиентам
+        for connection in active_connections:
+            try:
+                await connection.send_json(user_message_data)
+                await connection.send_json(ai_message_data)
+            except:
+                if connection in active_connections:
+                    active_connections.remove(connection)
+        
+        return {
+            "user_message": user_message_data,
+            "ai_message": ai_message_data
+        }
+        
+    except Exception as e:
+        print(f"Ошибка OpenAI API: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Ошибка при обращении к OpenAI API: {str(e)}"
+        )
 
 @app.on_event("startup")
 async def startup_event():

@@ -44,11 +44,14 @@
                         <button class="btn-icon" id="voice-btn" title="Голосовое сообщение">
                             <span>🎤</span>
                         </button>
+                        <button class="btn-icon" id="ai-btn" title="Спросить у ИИ" onclick="sendToAI(event)">
+                            <span>🤖</span>
+                        </button>
                     </div>
                     <form id="message-form" class="message-form" onsubmit="sendMessage(event)">
                         <textarea 
                             id="message-input" 
-                            placeholder="Введите сообщение..." 
+                            placeholder="Введите сообщение... (или нажмите 🤖 для ИИ)" 
                             rows="1"
                             onkeydown="handleKeyPress(event)"
                         ></textarea>
