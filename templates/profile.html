@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет - Valve Corporation</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🟠</span>
+                <span class="brand-name">Valve</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="/profile" class="nav-link active">Личный кабинет</a>
+                <a href="/chat" class="nav-link">Чат</a>
+                <a href="/games" class="nav-link">Игры</a>
+                <a href="#" onclick="logout()" class="nav-link">Выход</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="profile-main">
+        <div class="container">
+            <div class="profile-layout">
+                <!-- Профиль -->
+                <div class="profile-section">
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                {% if user.avatar %}
+                                <img id="avatar-img" src="{{ user.avatar }}" alt="Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="avatar-placeholder" id="avatar-placeholder" style="display: none;">{{ user.username[0].upper() }}</div>
+                                {% else %}
+                                <div class="avatar-placeholder" id="avatar-placeholder">{{ user.username[0].upper() }}</div>
+                                {% endif %}
+                                <button class="btn-avatar-edit" onclick="editAvatar()">✏️</button>
+                            </div>
+                            <div class="profile-info">
+                                <h1 id="profile-username">{{ user.username }}</h1>
+                                <p class="profile-email">{{ user.email }}</p>
+                                <span class="badge badge-role badge-{{ user.role }}">{{ 'Начальник' if user.role == 'boss' else 'Подчиненный' }}</span>
+                            </div>
+                        </div>
+                        <div class="profile-description">
+                            <h3>О себе</h3>
+                            <p id="profile-description">{{ user.description or 'Нет описания' }}</p>
+                            <button class="btn btn-secondary btn-sm" onclick="editDescription()">Редактировать</button>
+                        </div>
+                        <div class="profile-actions">
+                            <button class="btn btn-primary" onclick="showEditForm()">Редактировать профиль</button>
+                        </div>
+                    </div>
+
+                    <!-- Форма редактирования -->
+                    <div id="edit-form" class="edit-form" style="display: none;">
+                        <h3>Редактировать профиль</h3>
+                        <form onsubmit="handleProfileUpdate(event)">
+                            <div class="form-group">
+                                <label for="edit-username">Никнейм</label>
+                                <input type="text" id="edit-username" value="{{ user.username }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-avatar-file">Загрузить аватарку</label>
+                                <input type="file" id="edit-avatar-file" accept="image/*" onchange="handleAvatarUpload(event)">
+                                <small class="form-hint">Выберите изображение с вашего устройства</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-description">Описание</label>
+                                <textarea id="edit-description" rows="4" placeholder="Расскажите о себе">{{ user.description or '' }}</textarea>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Сохранить</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideEditForm()">Отмена</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Задачи -->
+                <div class="tasks-section">
+                    <div class="tasks-header">
+                        <h2>{% if user.role == 'boss' %}Мои задачи{% else %}Мои задачи{% endif %}</h2>
+                        {% if user.role == 'boss' %}
+                        <button class="btn btn-primary" onclick="showTaskForm()">+ Создать задачу</button>
+                        {% endif %}
+                    </div>
+
+                    <!-- Форма создания задачи (только для начальника) -->
+                    {% if user.role == 'boss' %}
+                    <div id="task-form" class="task-form" style="display: none;">
+                        <h3>Создать задачу</h3>
+                        <form onsubmit="handleTaskCreate(event)">
+                            <div class="form-group">
+                                <label for="task-title">Название</label>
+                                <input type="text" id="task-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-description">Описание</label>
+                                <textarea id="task-description" rows="3" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="task-assigned">Назначить</label>
+                                <select id="task-assigned" required>
+                                    <option value="">Выберите подчиненного</option>
+                                </select>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Создать</button>
+                                <button type="button" class="btn btn-secondary" onclick="hideTaskForm()">Отмена</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% endif %}
+
+                    <!-- Список задач -->
+                    <div id="tasks-list" class="tasks-list">
+                        {% if tasks %}
+                            {% for task in tasks %}
+                            <div class="task-card" data-task-id="{{ task.id }}">
+                                <div class="task-header">
+                                    <h3>{{ task.title }}</h3>
+                                    <span class="badge badge-status badge-{{ task.status }}">{{ task.status }}</span>
+                                </div>
+                                <p class="task-description">{{ task.description }}</p>
+                                <div class="task-meta">
+                                    {% if user.role == 'boss' %}
+                                    <p>Назначено: <strong id="assigned-name-{{ task.id }}">Загрузка...</strong></p>
+                                    {% else %}
+                                    <p>От: <strong id="creator-name-{{ task.id }}">Загрузка...</strong></p>
+                                    {% endif %}
+                                    <p>Создано: {{ task.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+                                </div>
+                                {% if user.role == 'employee' %}
+                                <div class="task-actions">
+                                    <select class="status-select" onchange="updateTaskStatus({{ task.id }}, this.value)">
+                                        <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>В ожидании</option>
+                                        <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>В работе</option>
+                                        <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Выполнено</option>
+                                    </select>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <p>Нет задач</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const currentUser = {{ user | tojson }};
+        const userRole = '{{ user.role }}';
+    </script>
+    <script src="/static/script.js"></script>
+</body>
+</html>
+

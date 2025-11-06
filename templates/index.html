@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valve Corporation - О компании</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🟠</span>
+                <span class="brand-name">Valve</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link active">Главная</a>
+                {% if user %}
+                <a href="/profile" class="nav-link">Личный кабинет</a>
+                <a href="/chat" class="nav-link">Чат</a>
+                <a href="/games" class="nav-link">Игры</a>
+                <a href="#" onclick="logout()" class="nav-link">Выход</a>
+                {% else %}
+                <a href="/login" class="nav-link">Вход</a>
+                <a href="/register" class="nav-link btn-nav">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Valve Corporation</h1>
+                <p class="hero-subtitle">Создатели игр, которые изменили индустрию</p>
+                <div class="hero-buttons">
+                    {% if not user %}
+                    <a href="/register" class="btn btn-primary btn-large">Присоединиться</a>
+                    <a href="/login" class="btn btn-secondary btn-large">Войти</a>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">О компании</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>Valve Corporation — американская компания-разработчик компьютерных игр, цифрового контента и дистрибуции, основанная в 1996 году Гейбом Ньюэллом и Майком Харрингтоном. Компания наиболее известна своими играми серии Half-Life, Portal, Counter-Strike, Team Fortress, Left 4 Dead и Dota 2.</p>
+                        <p>Valve также разработала и поддерживает платформу цифрового распространения Steam, которая является крупнейшей в мире платформой для распространения компьютерных игр. Steam предоставляет миллионам игроков доступ к тысячам игр от различных разработчиков.</p>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat-card">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Сотрудников</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">120+</div>
+                            <div class="stat-label">Игр в каталоге</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">125M+</div>
+                            <div class="stat-label">Пользователей Steam</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Games Section -->
+        <section class="section section-dark">
+            <div class="container">
+                <h2 class="section-title">Наши игры</h2>
+                <div class="games-grid">
+                    <div class="game-card">
+                        <div class="game-icon">🎮</div>
+                        <h3 class="game-title">Half-Life</h3>
+                        <p class="game-description">Революционная серия научно-фантастических шутеров от первого лица, которая изменила жанр и установила новые стандарты для интерактивного повествования.</p>
+                        <div class="game-tags">
+                            <span class="tag">FPS</span>
+                            <span class="tag">Sci-Fi</span>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-icon">🔵</div>
+                        <h3 class="game-title">Portal</h3>
+                        <p class="game-description">Уникальная головоломка с порталами, которая сочетает инновационную механику игры с остроумным сюжетом и запоминающимися персонажами.</p>
+                        <div class="game-tags">
+                            <span class="tag">Puzzle</span>
+                            <span class="tag">Platformer</span>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-icon">⚡</div>
+                        <h3 class="game-title">Counter-Strike</h3>
+                        <p class="game-description">Культовая многопользовательская тактическая игра, ставшая основой киберспорта и одной из самых популярных игр в мире.</p>
+                        <div class="game-tags">
+                            <span class="tag">FPS</span>
+                            <span class="tag">Multiplayer</span>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-icon">🎯</div>
+                        <h3 class="game-title">Team Fortress 2</h3>
+                        <p class="game-description">Бесплатный командный шутер с уникальным стилем, разнообразными классами персонажей и динамичным геймплеем.</p>
+                        <div class="game-tags">
+                            <span class="tag">FPS</span>
+                            <span class="tag">Team-based</span>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-icon">🧟</div>
+                        <h3 class="game-title">Left 4 Dead</h3>
+                        <p class="game-description">Кооперативный шутер о выживании в мире зомби-апокалипсиса с уникальной системой "Директора", создающей непредсказуемый игровой опыт.</p>
+                        <div class="game-tags">
+                            <span class="tag">Co-op</span>
+                            <span class="tag">Survival</span>
+                        </div>
+                    </div>
+
+                    <div class="game-card">
+                        <div class="game-icon">⚔️</div>
+                        <h3 class="game-title">Dota 2</h3>
+                        <p class="game-description">Один из самых популярных MOBA-игр в мире с миллионами активных игроков и крупнейшими турнирами в киберспорте.</p>
+                        <div class="game-tags">
+                            <span class="tag">MOBA</span>
+                            <span class="tag">Esports</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Section -->
+        <section class="section">
+            <div class="container">
+                <h2 class="section-title">Технологии и инновации</h2>
+                <div class="tech-grid">
+                    <div class="tech-item">
+                        <h3>🔧 Source Engine</h3>
+                        <p>Собственный игровой движок, используемый во многих играх Valve, известный своей гибкостью и производительностью.</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>💾 Steam</h3>
+                        <p>Крупнейшая платформа цифрового распространения игр, предоставляющая облачные сохранения, социальные функции и многое другое.</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🎮 VR</h3>
+                        <p>Valve активно развивает технологии виртуальной реальности, включая разработку VR-игр и оборудования.</p>
+                    </div>
+                    <div class="tech-item">
+                        <h3>🤖 AI</h3>
+                        <p>Инновационные системы искусственного интеллекта, такие как "Директор" в Left 4 Dead, создающие динамичный игровой опыт.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Valve Corporation. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

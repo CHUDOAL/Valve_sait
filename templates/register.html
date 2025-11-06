@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Valve Corporation</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🟠</span>
+                <span class="brand-name">Valve</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                <a href="/login" class="nav-link">Вход</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Регистрация</h1>
+                    <p>Создайте аккаунт для доступа к порталу</p>
+                </div>
+                <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="username">Никнейм</label>
+                        <input type="text" id="username" name="username" required placeholder="Введите никнейм">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Пароль</label>
+                        <input type="password" id="password" name="password" required placeholder="Минимум 6 символов">
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Роль</label>
+                        <select id="role" name="role" required>
+                            <option value="employee">Подчиненный</option>
+                            <option value="boss">Начальник</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Зарегистрироваться</button>
+                    <div class="auth-footer">
+                        <p>Уже есть аккаунт? <a href="/login">Войти</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>
+

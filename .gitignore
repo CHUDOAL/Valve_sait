@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+valve_portal.db
+
+# Environment
+.env
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (опционально - можно закомментировать если нужны тестовые файлы)
+uploads/avatars/*
+uploads/chat/images/*
+uploads/chat/videos/*
+uploads/chat/audio/*
+!uploads/avatars/.gitkeep
+!uploads/chat/images/.gitkeep
+!uploads/chat/videos/.gitkeep
+!uploads/chat/audio/.gitkeep
+
+# Logs
+*.log

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игры - Valve Corporation</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/games.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <span class="logo">🟠</span>
+                <span class="brand-name">Valve</span>
+            </div>
+            <div class="nav-links">
+                <a href="/" class="nav-link">Главная</a>
+                {% if user %}
+                <a href="/profile" class="nav-link">Личный кабинет</a>
+                <a href="/chat" class="nav-link">Чат</a>
+                <a href="/games" class="nav-link active">Игры</a>
+                <a href="#" onclick="logout()" class="nav-link">Выход</a>
+                {% else %}
+                <a href="/login" class="nav-link">Вход</a>
+                <a href="/register" class="nav-link btn-nav">Регистрация</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="games-main">
+        <div class="container">
+            <div class="games-header">
+                <h1>🎮 Игровая зона</h1>
+                <p>Отдохните и поиграйте в наши мини-игры</p>
+            </div>
+
+            <div class="games-grid">
+                <div class="game-card" onclick="startGame('tic-tac-toe')">
+                    <div class="game-icon">⭕</div>
+                    <h3>Крестики-нолики</h3>
+                    <p>Классическая игра для двух игроков</p>
+                </div>
+
+                <div class="game-card" onclick="startGame('snake')">
+                    <div class="game-icon">🐍</div>
+                    <h3>Змейка</h3>
+                    <p>Соберите как можно больше яблок</p>
+                </div>
+
+                <div class="game-card" onclick="startGame('clicker')">
+                    <div class="game-icon">🖱️</div>
+                    <h3>Кликер</h3>
+                    <p>Кликайте и зарабатывайте очки</p>
+                </div>
+
+                <div class="game-card" onclick="startGame('platformer')">
+                    <div class="game-icon">🎮</div>
+                    <h3>Платформер</h3>
+                    <p>Классический платформер в стиле Марио</p>
+                </div>
+            </div>
+
+            <!-- Игровая область -->
+            <div id="game-area" class="game-area" style="display: none;">
+                <div class="game-header-bar">
+                    <button class="btn btn-secondary" onclick="backToGames()">← Назад к играм</button>
+                    <h2 id="current-game-title"></h2>
+                    <div id="game-score" class="game-score"></div>
+                </div>
+                <div id="game-content" class="game-content"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/script.js"></script>
+    <script src="/static/games.js"></script>
+</body>
+</html>
+
